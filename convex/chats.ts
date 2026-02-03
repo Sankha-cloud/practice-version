@@ -11,13 +11,13 @@ export const createChat=mutation({
     if(!userId){
       throw new Error("Unauthorized");
     }
-    const chat=await ctx.db.insert("chats",{
+    const chatId=await ctx.db.insert("chats",{
       userId,
       title:args.title,
       createdAt:Date.now(),
       updatedAt:Date.now()
     });
-    return chat;
+    return chatId;
   }
 });
 export const getByChatId=query({

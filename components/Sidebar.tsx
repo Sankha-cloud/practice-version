@@ -6,13 +6,26 @@ import {Search} from "lucide-react";
 import {Input} from "./ui/input";
 import {useState} from "react";
 import { X } from 'lucide-react';
+import {useQuery} from "convex/react";
+import {api} from "@/convex/_generated/api";
+import {MessageSquare} from "lucide-react";
+import {useRouter} from "next/navigation";
+import {Id} from "@/convex/_generated/dataModel";
 export default function(){
-  const {onClose}=useSidebar();
+  const {isCollapsed,onClose}=useSidebar();
   const [searchTerm,setSearchTerm]=useState("");
-  return (
-     <aside className="flex flex-col min-h-screen bg-sidebar">
+  const chatsList=useQuery(api.chats.chatList);
+  const router=useRouter();
+  function handleNewChat(){
+    router.push("/");
+  }
+  function handleChatClick(chatId:Id<"chats">){
+    router.push(`/chat/${chatId}`);
+  }
+  return isCollapsed === false ?(
+     <aside className="flex flex-col min-h-screen bg-sidebar w-64 fixed left-0 top-0 z-10">
      <div className="flex items-center justify-between p-3 border-b-3 border-sidebar-border ">
-      <Button variant="ghost" >
+      <Button variant="ghost" onClick={handleNewChat}>
         <Plus className="h-6 w-6"/>
         <p>New Chat</p>
       </Button>
@@ -34,9 +47,23 @@ export default function(){
       }
     </div>
     </div>
-    <div className="flex items-center justify-between p-3 border-b border-border">
-      <p>Your Chats</p>
+    <div className="flex justify-between p-3 border-b border-border flex-col gap-2">
+      <p className="text-sm font-medium ml-2">Your Chats</p>
+      {
+        chatsList && chatsList.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {
+              chatsList.map((chat)=>(
+                <div key={chat._id} onClick={()=>handleChatClick(chat._id)}>
+                  <MessageSquare className="h-4 w-4"/>
+                  <p>{chat.title.slice(0,25)}{chat.title.length > 25 ? "..." : ""}</p>
+                </div>
+              ))
+            }
+            </div>
+        ):(<p className="text-sm text-muted-foreground ml-2">No chats found</p>)
+      }
     </div>
      </aside>
-  )
+  ):null;
 }
